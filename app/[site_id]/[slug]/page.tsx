@@ -172,29 +172,29 @@ import { ChevronLeft } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import ReactHtmlParser from 'react-html-parser';
-import { Metadata } from 'next';
 import { readAllArticles } from '@/utils/actions/sites/articles/read-articles';
 
 // Die statische metadata-Deklaration entfernen und nur generateMetadata behalten
+import { defaultMetadata } from '@/app/metadata';
+import { Metadata } from 'next';
+
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   try {
+    // Artikel anhand des Slugs abrufen
     const { response } = await getAllArticleBySlug(params?.slug);
 
-    // Ermittlung der Base-URL für verschiedene Umgebungen
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_DOMAIN || 
-                   (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 
-                   'http://localhost:3000');
-
     if (response?.length === 0) {
+      // Fallback für nicht gefundene Artikel
       return {
-        metadataBase: new URL(baseUrl),
+        ...defaultMetadata,
         title: 'Not Found',
         description: 'The page you are looking for does not exist',
       };
     }
 
+    // Metadaten für gefundenen Artikel erstellen
     return {
-      metadataBase: new URL(baseUrl),
+      ...defaultMetadata,
       title: response?.[0]?.title,
       description: response?.[0]?.subtitle,
       openGraph: {
@@ -205,47 +205,71 @@ export async function generateMetadata({ params }: { params: { slug: string } })
       keywords: [...response?.[0]?.keywords],
     };
   } catch (error) {
-    console.error(error);
+    // Fehlerbehandlung und Logging
+    console.error('Fehler beim Generieren der Metadaten:', error);
+    
+    // Fallback-Metadaten bei Fehlern
     return {
-      metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_DOMAIN || 'http://localhost:3000'),
+      ...defaultMetadata,
       title: 'Not Found',
       description: 'The page you are looking for does not exist',
     };
   }
 }
+
 export async function generateStaticParams() {
   try {
-    // Direkter API-Aufruf statt Server Action
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_DOMAIN}/api/blog/slugs`,
-      {
-        headers: {
-          'X-Auth-Key': process.env.CMS_API_KEY!,
-        },
-        // Wichtig: Keine Cache-Optionen während des Builds
-        cache: 'no-store'
+    // Lokale Fallback-Strategie für Builds
+    if (process.env.NODE_ENV === 'production') {
+      try {
+        // Direkter API-Aufruf mit absoluter URL statt relativer URL
+        const baseUrl = process.env.NEXT_PUBLIC_BASE_DOMAIN || 
+                       (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
+        
+        const response = await fetch(
+          `${baseUrl}/api/blog/slugs`,
+          {
+            headers: {
+              'X-Auth-Key': process.env.CMS_API_KEY || '',
+            },
+            cache: 'no-store'
+          }
+        );
+        
+        if (!response.ok) {
+          throw new Error(`API-Anfrage fehlgeschlagen: ${response.status} ${response.statusText}`);
+        }
+
+        const result = await response.json();
+        if (result?.error) {
+          throw new Error(`Failed to fetch articles: ${result.error}`);
+        }
+
+        if (!result?.response || result.response.length === 0) {
+          console.log('Keine Artikel gefunden für statische Generierung');
+          return [];
+        }
+        
+        console.log(`${result.response.length} Artikel für statische Generierung gefunden`);
+        
+        return result.response.map((post: any) => ({
+          site_id: post.site_id || 'default',
+          slug: post.slug,
+        }));
+      } catch (error) {
+        console.error('API-Fehler in generateStaticParams:', error);
+        // Leeres Array zurückgeben, damit der Build nicht fehlschlägt
+        return [];
       }
-    );
-
-    const result = await response.json();
-    if (result?.error) {
-      throw new Error(`Failed to fetch articles: ${result.error}`);
+    } else {
+      // Für Entwicklungsumgebung: Dummy-Daten als Fallback
+      console.log('Verwende Dummy-Daten für statische Generierung in Entwicklungsumgebung');
+      return [
+        { site_id: 'default', slug: 'beispiel-artikel' }
+      ];
     }
-
-    if (result?.response?.length === 0) {
-      console.log('Keine Artikel gefunden für statische Generierung');
-      return [];
-    }
-    
-    console.log(`${result.response.length} Artikel für statische Generierung gefunden`);
-    
-    return result.response.map((post: any) => ({
-      site_id: post.site_id || 'default',
-      slug: post.slug,
-    }));
-
   } catch (error) {
-    console.error('Fehler beim Abrufen der Artikel für statische Generierung:', error);
+    console.error('Allgemeiner Fehler in generateStaticParams:', error);
     return [];
   }
 }

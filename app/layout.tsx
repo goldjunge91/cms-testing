@@ -1,6 +1,6 @@
 import { Toaster } from "@/components/ui/sonner"
 import { ClerkProvider } from '@clerk/nextjs'
-import type { Metadata } from 'next'
+import { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import Provider from './provider'
@@ -9,14 +9,28 @@ import { ThemeProvider } from "next-themes"
 
 const inter = Inter({ subsets: ['latin'] })
 
+// Metadaten für SEO und soziale Medien
 export const metadata: Metadata = {
-  title: 'CMS Testing',
-  description: 'A content management system built with Next.js and Clerk',
+  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_DOMAIN || 'https://cms-testing-eefm2yiiy-goldjunge91s-projects.vercel.app'),
+  title: {
+    default: 'Tsafi CMS',
+    template: '%s | Tsafi CMS',
+  },
+  description: 'Ein AI-gesteuertes Content Management System',
   openGraph: {
-    images: ['https://utfs.io/f/59a2a3e1-f1b9-4152-97d2-38dea6e14106-3hq5f6.png']
+    type: 'website',
+    locale: 'de_DE',
+    url: process.env.NEXT_PUBLIC_BASE_DOMAIN || 'https://cms-testing-eefm2yiiy-goldjunge91s-projects.vercel.app',
+    siteName: 'Tsafi CMS',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Tsafi CMS',
+    description: 'Ein AI-gesteuertes Content Management System',
   },
 }
 
+// Hauptlayout-Komponente
 export default function RootLayout({
   children,
 }: {
@@ -24,7 +38,7 @@ export default function RootLayout({
 }) {
   return (
     <ClerkProvider>
-      <html lang="en" suppressHydrationWarning>
+      <html lang="de" suppressHydrationWarning>
         <body className={inter.className}>
           <Provider>
             <ThemeProvider
@@ -33,7 +47,6 @@ export default function RootLayout({
               enableSystem
               disableTransitionOnChange
             >
-
               {children}
             </ThemeProvider>
             <Toaster />

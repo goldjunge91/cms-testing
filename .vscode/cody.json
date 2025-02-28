@@ -1,0 +1,10 @@
+{
+  "dd": {
+    "prompt": "ghjg",
+    "context": {
+      "selection": true,
+      "currentFile": true
+    },
+    "mode": "edit"
+  }
+}

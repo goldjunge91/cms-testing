@@ -152,7 +152,8 @@ export default function DocumentEditor({ params }: { params: { id: string, site_
     if (editor && data?.[0]?.document) {
       editor.commands.setContent(data?.[0]?.document)
     }
-  }, [editor, data?.[0]?.document]);
+  }, [data, editor]);
+//   }, [editor, data?.[0]?.document]);
 
 
   const html = editor?.getHTML()

@@ -4,6 +4,7 @@ import { ArrowRight } from 'lucide-react';
 import Link from "next/link";
 import { BorderBeam } from '../magicui/border-beam';
 import { Button } from "../ui/button";
+import Image from 'next/image';
 
 export default function HeroSection() {
     return (
@@ -32,12 +33,12 @@ export default function HeroSection() {
                     >
                         <div className="relative flex max-w-4xl justify-center overflow-hidden mt-7">
                             <div className="relative rounded-xl">
-                                <img
+                                <Image
                                     src="/home.png"
                                     alt="Hero Image"
                                     className="block dark:hidden w-[1200px] rounded-[inherit] border object-contain shadow-lg"
                                 />
-                                <img
+                                <Image
                                     src="/dash-dark.png"
                                     alt="Hero Image"
                                     className="hidden dark:block w-[1200px] rounded-[inherit] border object-contain shadow-lg"

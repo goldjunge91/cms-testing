@@ -91,7 +91,7 @@ export default function Publish({ params }: { params: { site_id: string } }) {
     if (title) {
       form.setValue('slug', generateSlug(title));
     }
-  }, [form.watch('title')]);
+  }, [form]);
 
   async function onSubmit(data: z.infer<typeof FormSchema>) {
     try {

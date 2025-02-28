@@ -5,13 +5,13 @@ const navigation = {
     connect: [
         {
             name: 'Github',
-            href: 'https://github.com/michaelshimeles/cms',
+            href: 'https://github.com/goldjunge91/cms',
         },
     ],
     company: [
-        { name: 'X', href: 'https://x.com/rasmickyy' },
-        { name: 'YouTube', href: 'https://www.youtube.com/@rasmic' },
-        { name: 'Discord', href: 'https://discord.gg/TRccaehh8n' },
+        { name: 'X', href: 'https://x.com/goldjunge91' },
+        { name: 'YouTube', href: 'https://www.youtube.com/@goldjunge491' },
+        { name: 'Discord', href: 'https://discord.gg/goldjunge91' },
     ],
 }
 
@@ -32,8 +32,8 @@ const Footer = () => {
                             <p className="text-md max-w-xs leading-6 text-gray-700 dark:text-gray-400">
                                 I built this because I didn&apos;t want to read the docs of another CMS.
                             </p>
-                            <Link href="https://x.com/rasmickyy" target='_blank' className="flex space-x-6 text-sm dark:text-gray-400 text-gray-700">
-                                <div>Made with ❤️ by Micky.</div>
+                            <Link href="https://x.com/gold-junge91" target='_blank' className="flex space-x-6 text-sm dark:text-gray-400 text-gray-700">
+                                <div>Made with ❤️.</div>
                             </Link>
                         </div>
                         {/* Navigations */}

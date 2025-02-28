@@ -1,10 +1,11 @@
 import { Card } from "@/components/ui/card"
+import Image from 'next/image'
 
 export default function ArticleCard() {
   return (
     <Card className="w-full max-w-xs rounded">
       <div className="relative aspect-square overflow-hidden">
-        <img
+        <Image
           alt="Cover image"
           className="w-full h-full blur-2 rounded"
           height="300"

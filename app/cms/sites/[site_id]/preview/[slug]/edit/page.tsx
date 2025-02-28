@@ -217,7 +217,7 @@ export default function ArticleEditor({ params }: { params: { slug: string, site
     if (editor && data?.[0]?.blog_html) {
       editor.commands.setContent(data?.[0]?.blog_html)
     }
-  }, [editor, data?.[0]?.blog_html]);
+  }, [data, editor]);
 
 
   const html = editor?.getHTML()

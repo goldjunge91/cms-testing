@@ -1,6 +1,6 @@
 "use client"
 
-import ModeToggle from "@/components/ModeToggle"
+import ModeToggle from "@/components/mode-toggle"
 import { Button } from "@/components/ui/button"
 import {
   NavigationMenu,
@@ -10,12 +10,10 @@ import {
 import { SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { cn } from "@/lib/utils"
 import { Dialog, DialogClose } from "@radix-ui/react-dialog"
-import { BookOpen } from 'lucide-react'
 import Image from "next/image"
 import Link from "next/link"
 import * as React from "react"
 import { GiHamburgerMenu } from "react-icons/gi"
-
 
 export function NavBar({
   title,
@@ -53,7 +51,7 @@ export function NavBar({
       <NavigationMenu>
         <NavigationMenuList className="max-[825px]:hidden ">
           <Link href="/" className="pl-2">
-            {logo ? <Image src={logo} width={40} height={40} alt="logo"/>: <p className="font-semibold">{title}</p>}
+            {logo ? <Image src={logo} width={40} height={40} alt="logo" /> : <p className="font-semibold">{title}</p>}
           </Link>
         </NavigationMenuList>
       </NavigationMenu>

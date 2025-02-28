@@ -1,35 +1,46 @@
+export const dynamic = "force-dynamic";
+
 import { createSites } from "@/utils/actions/sites/create-site";
 import { readSites } from "@/utils/actions/sites/read-sites";
 import { changeSiteName } from "@/utils/actions/sites/settings/change-site-name";
 import { changeSiteSubdomain } from "@/utils/actions/sites/settings/change-site-subdomain";
+import { generateBlogImage } from "@/utils/functions/ai/blog-image";
+import { searchInternet } from "@/utils/functions/ai/search-internet";
 import { storeMessages } from "@/utils/functions/ai/store-messages";
+import { youtubeToDocument } from "@/utils/functions/ai/youtube-to-document";
 import { readSiteName } from "@/utils/functions/sites/read-site-name";
-import { readSiteSubdmain } from "@/utils/functions/sites/read-site-subdomain";
 import { openai } from "@ai-sdk/openai";
 import { currentUser } from "@clerk/nextjs/server";
 import { convertToCoreMessages, streamText, tool } from "ai";
 import { z } from "zod";
 
 export async function POST(req: Request) {
-  const { messages } = await req.json();
-
+  const { messages, selectedSite } = await req.json();
   const user = await currentUser();
-
-  const messageResult = await storeMessages(user?.id!, messages);
 
   const system = `
   You are tsafi ai, an ai assistant helping users of tsafi create and manage their blog sites and content.
   The user's first name is ${user?.firstName}, their email ${user?.emailAddresses?.[0]?.emailAddress}.
 
-  Be friendly and crack jokes when you can. Be very human-like and not robotic.
-`;
+  DO NOT RENDER A RESPONSE IN MARKDOWN.
 
-console.log('messageResult', messageResult)
+  Be friendly and crack jokes when you can. Be very human-like and not robotic.`;
+
+  const safeConvertToCoreMessages = (msgs: any) => {
+    try {
+      return convertToCoreMessages(msgs);
+    } catch (error) {
+      console.error("Error in convertToCoreMessages:", error);
+      return [];
+    }
+  };
+
+  const coreMessages = safeConvertToCoreMessages(messages);
 
   const result = await streamText({
-    model: openai("gpt-4o"),
+    model: openai("gpt-4o-mini") as any,
     system,
-    messages: convertToCoreMessages(messageResult?.[0]?.messages),
+    messages: coreMessages,
     tools: {
       create_site: tool({
         description: "Create a new blog site",
@@ -56,85 +67,124 @@ console.log('messageResult', messageResult)
             site_description: result?.[0]?.site_description,
             site_subdomain: result?.[0]?.site_subdomain,
             site_logo: result?.[0]?.site_logo,
-            message: `Your blog site has been created ${user?.firstName}. It's called ${site_name} and you can check it out by clicking the button below.`,
+            message: `Your blog site has been created. It's called ${site_name} and you can check it out by clicking the button below.`,
           };
         },
       }),
       read_sites: tool({
         description: "List of all the blog websites",
-        parameters: z.object({
-          user_id: z.string().describe("user id"),
-        }),
+        parameters: z.object({}),
         execute: async () => {
           const result = await readSites();
-
-          const sites = result.map((site: any) => ({
-            name: site.site_name,
-            subdomain: site.site_subdomain,
-          }));
-
-          const displaySites = sites
-            .map(
-              (site: any) =>
-                `${site.name}, ${site.subdomain}.tsafi.xyz`
-            )
-            .join("\n");
-
+          if (!result?.[0]?.site_name) {
+            return {
+              message: "You have no blog sites, you should create one 😉",
+            };
+          }
           return {
-            result: JSON.stringify(result),
-            message: `${displaySites}`,
+            message:
+              result.length === 1
+                ? "Here's your blog site"
+                : "Here are your blog sites",
+            result: result,
           };
         },
       }),
       update_site_name: tool({
         description: "Change or update the name of a site",
         parameters: z.object({
-          current_site_name: z.string().describe("new site name"),
           new_site_name: z.string().describe("new site name"),
         }),
-        execute: async ({ current_site_name, new_site_name }) => {
-          const getSiteInfo = await readSiteName(current_site_name);
-
+        execute: async ({ new_site_name }) => {
+          const getSiteInfo = await readSiteName(selectedSite?.site_name);
           const result = await changeSiteName(
             getSiteInfo?.[0]?.site_id,
             new_site_name
           );
           return {
             result: JSON.stringify(result),
-            message: `Your blog site name has been updated from ${current_site_name} to ${result?.[0]?.site_name} and you can check it out by clicking the button below.`,
+            message: `Your blog site name has been updated from ${selectedSite?.site_name} to ${result?.[0]?.site_name} and you can check it out by clicking the button below.`,
           };
         },
       }),
       update_sub_domain: tool({
         description: "Change or update the subdomain of a site",
         parameters: z.object({
-          current_site_subdomain: z.string().describe("current site subdomain"),
           new_site_subdomain: z.string().describe("new site subdomain"),
         }),
-        execute: async ({ current_site_subdomain, new_site_subdomain }) => {
-          const getSiteInfo = await readSiteSubdmain(current_site_subdomain);
-
+        execute: async ({ new_site_subdomain }) => {
+          const getSiteInfo = await readSiteName(selectedSite?.site_name);
           const result = await changeSiteSubdomain(
             getSiteInfo?.[0]?.site_id,
             new_site_subdomain
           );
           return {
             result: JSON.stringify(result),
-            message: `Your blog site subdomain has been updated from ${current_site_subdomain} to ${result?.[0]?.site_subdomain} and you can check it out by clicking the button below.`,
+            message: `Your blog site ${selectedSite?.site_name} subdomain has been updated to ${result?.[0]?.site_subdomain} and you can check it out by clicking the button below.`,
           };
         },
       }),
-    },
-    onFinish: async ({ text, toolCalls, toolResults, finishReason, usage }) => {
-      console.log("toolCalls", toolCalls);
-      console.log("toolResults", toolResults);
-
-      storeMessages(user?.id!, [
-        {
-          role: "assistant",
-          content: toolResults?.[0]?.result?.message,
+      generate_blog_image: tool({
+        description: "Generate a blog image",
+        parameters: z.object({
+          prompt: z
+            .string()
+            .describe("description of the blog image user wants generated"),
+        }),
+        execute: async ({ prompt }) => {
+          return await generateBlogImage(prompt);
         },
-      ]);
+      }),
+      generate_document_from_youtube: tool({
+        description: "Generate a document from a youtube video",
+        parameters: z.object({
+          youtube_video_url: z.string().describe("URL of the YouTube video"),
+        }),
+        execute: async ({ youtube_video_url }) => {
+          return await youtubeToDocument(youtube_video_url, null);
+        },
+      }),
+      // search_internet: tool({
+      //   description: "Searching the internet",
+      //   parameters: z.object({
+      //     query: z.string().describe("Query for internet search"),
+      //   }),
+      //   execute: async ({ query }) => {
+      //     const response = await searchInternet(query);
+      //     return {
+      //       message: "Here's the search result",
+      //       result: response?.answerBox,
+      //     };
+      //   },
+      // }),
+    },
+    onFinish: async ({ text, toolResults, toolCalls }: any) => {
+      console.log("toolResults", toolResults);
+      if (text) {
+        await storeMessages(user?.id!, [
+          ...messages,
+          { role: "assistant", content: text },
+        ]);
+        return;
+      }
+
+      for (const toolResult of toolResults) {
+        const newMessage = {
+          role: "assistant",
+          type: `${toolResult?.type}_${toolResult?.toolName}`,
+          content: toolResult?.result?.message || "Here's the result",
+          result: toolResult?.result,
+        };
+
+        if (toolResult?.toolName === "generate_blog_image") {
+          newMessage.content = toolResult?.result?.prompt;
+          newMessage.result = toolResult?.result?.images?.[0];
+        } else if (toolResult?.toolName === "search_internet") {
+          newMessage.result = toolResults?.[0]?.result?.result;
+        }
+
+        await storeMessages(user?.id!, [...messages, newMessage]);
+      }
     },
   });
 

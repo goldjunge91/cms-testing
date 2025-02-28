@@ -1,13 +1,13 @@
-import { auth } from "@clerk/nextjs/server";
+"use server";
+import { clerkClient } from "@clerk/nextjs/server";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
-export const readMessages = async () => {
-  const { userId } = auth();
-
-  if (!userId) {
-    return null;
-  }
+export const getArticleBySlugSiteId = async (
+  site_id: string,
+  slug: string,
+  userId: string
+) => {
   const cookieStore = cookies();
 
   const supabase = createServerClient(
@@ -22,10 +22,20 @@ export const readMessages = async () => {
     }
   );
   try {
+    const result = await clerkClient.users.getUser(userId!);
+
     const { data, error } = await supabase
-      .from("chat")
-      .select("*")
-      .eq("user_id", userId);
+      .from("blog")
+      .select(
+        `*,
+      author (*),
+      category (*)
+      `
+      )
+      .eq("slug", slug)
+      .eq("site_id", site_id)
+      .eq("published", true)
+      .eq("user_id", result?.id);
 
     if (error?.code) return error;
 

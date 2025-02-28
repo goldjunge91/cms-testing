@@ -1,12 +1,14 @@
 export const transformNode = (node: any) => {
   // Applying classes to paragraph tags
   if (node.type === "tag" && node.name === "p") {
+
     let className = "leading-7 text-sm";
 
     // Check if the paragraph is not a child of a list item
     if (!node.parent || node.parent.name !== "li") {
       className += " mt-6";
     }
+
 
     if (node.attribs.class) {
       className = `${node.attribs.class} ${className}`;

@@ -2,12 +2,14 @@ import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { getAllArticleBySlug } from '@/utils/actions/articles/get-article-slug'
 import { readArticleSlug } from '@/utils/actions/sites/articles/read-article-slug'
+import { transformNode } from '@/utils/transform-node'
 import { ChevronLeft } from 'lucide-react'
 import Image from "next/image"
 import Link from 'next/link'
 import ReactHtmlParser from 'react-html-parser'
 
-// export async function generateMetadata({ params }: { params: { slug: string } }) {
+// export async function generateMetadata({ params }: { params: { slug: string, site_id: string } }) {
+
 //   try {
 //     const { response } = await getAllArticleBySlug(params?.slug)
 
@@ -36,9 +38,10 @@ import ReactHtmlParser from 'react-html-parser'
 // }
 
 // export async function generateStaticParams() {
+
 //   try {
 //     const response: any = await fetch(
-//       "https://cms.rasmic.xyz/api/blog/slugs",
+//       `${process.env.NEXT_PUBLIC_FRONTEND_URL}/api/blog/slugs`,
 //       {
 //         headers: {
 //           "X-Auth-Key": process.env.CMS_API_KEY!,
@@ -47,6 +50,7 @@ import ReactHtmlParser from 'react-html-parser'
 //     );
 
 //     const result = await response.json()
+
 //     if (result?.error) {
 //       throw new Error(`Failed to fetch articles: ${response.statusText}`);
 //     }
@@ -128,38 +132,3 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
     </>
   )
 }
-
-
-const transformNode = (node: any) => {
-  // Applying classes to paragraph tags
-  if (node.type === "tag" && node.name === "p") {
-    let className = "leading-7 mt-6";
-    if (node.attribs.class) {
-      className = `${node.attribs.class} ${className}`;
-    }
-    node.attribs.class = className;
-  }
-
-  // Example for adding classes to anchor tags
-  if (node.type === "tag" && node.name === "a") {
-    node.attribs.class =
-      "font-medium text-primary underline underline-offset-4";
-  }
-
-  // Add more conditions for other tags as needed
-  // Example for adding classes to anchor tags
-  if (node.type === "tag" && node.name === "h1") {
-    node.attribs.class =
-      "scroll-m-20 text-2xl font-extrabold pt-4 tracking-tight lg:text-3xl";
-  }
-
-  if (node.type === "tag" && node.name === "h2") {
-    node.attribs.class =
-      "mt-10 scroll-m-20 border-b pb-2 text-xl font-semibold tracking-tight transition-colors first:mt-0";
-  }
-
-  if (node.type === "tag" && node.name === "h3") {
-    node.attribs.class =
-      "mt-8 scroll-m-20 text-lg font-semibold tracking-tight";
-  }
-};

@@ -1,12 +1,12 @@
 "use client"
 
-import { Profile } from "@/components/Profile"
+import { Profile } from "@/components/user-profile"
 import { GiHamburgerMenu } from 'react-icons/gi'
 import { Dialog, DialogClose } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "../../../components/ui/sheet"
 import Link from "next/link"
-import ModeToggle from "@/components/ModeToggle"
+import ModeToggle from "@/components/mode-toggle"
 
 export default function DashboardNavMobile() {
   return (
@@ -26,7 +26,12 @@ export default function DashboardNavMobile() {
             <div className="flex flex-col space-y-3 mt-[1rem]">
               <DialogClose asChild>
                 <Link href="/cms">
-                  <Button variant="outline" className="w-full">Dashboard</Button>
+                  <Button variant="outline" className="w-full">Site(s)</Button>
+                </Link>
+              </DialogClose>
+              <DialogClose asChild>
+                <Link href="/cms/ai">
+                  <Button variant="outline" className="w-full">AI (alpha)</Button>
                 </Link>
               </DialogClose>
               <DialogClose asChild>

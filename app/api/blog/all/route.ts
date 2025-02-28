@@ -1,7 +1,7 @@
-import { getAllArticlesApi } from "@/utils/actions/api/get-articles-api";
+import { getAllArticlesApi } from "@/utils/actions/api/get-articles";
 import { clerkClient } from "@clerk/nextjs/server";
 import { headers } from "next/headers";
-import { NextResponse } from "next/server";
+import { NextResponse, } from "next/server";
 
 export async function GET() {
   const authorization = headers().get("X-Auth-Key");

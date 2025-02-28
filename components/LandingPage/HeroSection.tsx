@@ -5,7 +5,7 @@ import Link from "next/link";
 import { BorderBeam } from '../magicui/border-beam';
 import { Button } from "../ui/button";
 import Image from 'next/image';
-
+import home from '../../public/home.png';
 export default function HeroSection() {
     return (
         <div className='flex flex-col items-center justify-center mt-[7rem] mb-[3rem] p-3'>
@@ -34,13 +34,15 @@ export default function HeroSection() {
                         <div className="relative flex max-w-4xl justify-center overflow-hidden mt-7">
                             <div className="relative rounded-xl">
                                 <Image
-                                    src="/home.png"
+                                    src={home}
                                     alt="Hero Image"
                                     className="block dark:hidden w-[1200px] rounded-[inherit] border object-contain shadow-lg"
                                 />
                                 <Image
                                     src="/dash-dark.png"
                                     alt="Hero Image"
+									width={1200}
+									height={800}
                                     className="hidden dark:block w-[1200px] rounded-[inherit] border object-contain shadow-lg"
                                 />
                                 <BorderBeam size={250} duration={12} delay={9} />

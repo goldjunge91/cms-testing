@@ -31,7 +31,9 @@ Before you begin, ensure you have met the following requirements:
 - npm or yarn
 - A Supabase account and project
 - OpenAI API key
-- Clerk account for authentication
+- Clerk account for authenticationdeno --version
+
+
 - UploadThing account for file uploads
 
 ## Installation
@@ -68,8 +70,8 @@ Before you begin, ensure you have met the following requirements:
    NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/
    NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/
 
-   SUPABASE_URL=your_supabase_project_url
-   SUPABASE_SECRET_KEY=your_supabase_secret_key
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_NEXT_PUBLIC_SUPABASE_ANON_KEY
 
    OPENAI_API_KEY=your_openai_api_key
 

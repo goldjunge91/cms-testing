@@ -18,7 +18,7 @@ export default [
 			// JavaScript-Basisregeln
 			"no-unused-vars": "off",
 			"no-undef": "off",
-			"no-console": "warn",
+			"no-console": "off",
 
 			// TypeScript-spezifische Regeln
 			"@typescript-eslint/no-explicit-any": "off",

@@ -224,7 +224,7 @@ export async function generateStaticParams() {
       try {
         // Direkter API-Aufruf mit absoluter URL statt relativer URL
         const baseUrl = process.env.NEXT_PUBLIC_BASE_DOMAIN || 
-                       (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
+			(process.env.BASE_DOMAIN ? `https://${process.env.BASE_DOMAIN }` : 'http://localhost:3000');
         
         const response = await fetch(
           `${baseUrl}/api/blog/slugs`,
